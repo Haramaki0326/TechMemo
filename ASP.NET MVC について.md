@@ -18,18 +18,22 @@ MVC 3 からは、View側を記述するためのDSLとして、Razorが導入�
 - ControllerとViewは一対一対応する（？）  
 たとえば、`Controllers`フォルダの中に、`HomeContoroller`および`BookContoroller`があるとする。このとき、対応するビューが`Views`フォルダ配下にそれぞれ、`Home`、`Book`フォルダが作られる。  
 この対応に沿ってそれぞれのコントローラーからビューに値を渡すことになる。
-
-- >Razorビューにデータ渡すには3つの方法があり、2つの組込ディクショナリ(ViewData, ViewBag)、もしくは強く型指定されたViewModelを使用します。
-3つの方法いずれもデータバインディングの機能を実現できますし、パフォーマンスに関してもごくわずかな差です。
-しかし、設計、保守性観点ではViewModelを使用するほうがMicrosoftから強く推奨されています。
-[ASP.NET Core 入門5 ASP.NET Core MVC ビューエンジンRazor](https://qiita.com/dongsu-iis/items/5f830381aa8796421f67)  
-
-
-## ViewBagとViewData
+![](https://github.com/Haramaki0326/TechMemo/blob/develop/%E3%82%B3%E3%83%B3%E3%83%88%E3%83%AD%E3%83%BC%E3%83%A9%E3%83%BC%E3%81%A8%E3%83%93%E3%83%A5%E3%83%BC%E3%81%AE%E9%96%A2%E4%BF%8201.PNG?raw=true)
+- コントローラー（またはモデル）からビューに値を渡す方法は３つ。`ViewData`,`ViewBag`,`ViewModel`。MSの推奨は`ViewModel`。  
+参考：[ASP.NET Core 入門5 ASP.NET Core MVC ビューエンジンRazor](https://qiita.com/dongsu-iis/items/5f830381aa8796421f67) 
+- ビューからコントローラーに値を渡す方法は、通常のHTMLと同じ方法。つまり、`<form>`タグの中に`submit`属性値を指定する方法。後述。  
+参考：[第5回　新しいビュー・エンジン「Razor」の基本を理解しよう](https://www.atmarkit.co.jp/fdotnet/aspnetmvc3/aspnetmvc3_06/aspnetmvc3_06_03.html) 
+``` html
+<form>
+    <input type="submit">
+</form>
+```
+## コントローラー（またはモデル）からビューに値を渡す方法
+### 1. ViewData
 ControllerとView間でデータの受け渡すための入れ物
-### ViewBag
+### 2. ViewBag
 
-### 記述例
+#### 記述例
 
 ``` csharp
 //Controllers/ViewController
@@ -56,7 +60,7 @@ public ActionResult Index()
 @((int)ViewData["Price"] * 10) @* 10 と表示される *@
 ```
 
-## @model
+### 3. ViewModel (もしくは@model)
 ### 概要
 - View(cshtml)で使用する型が指定できます
 `@model Employee`
@@ -127,7 +131,11 @@ namespace razor2.Controllers
 ### 複数のModelをViewに渡したいときは・・・
 [stackoverflow - Multiple models in a view](https://stackoverflow.com/questions/4764011/multiple-models-in-a-view)
 
-## Razor
+
+## ビューからコントローラーに値を渡す方法
+あとで
+
+## Razor構文
 ### インライン式
 
 ### コードブロック
