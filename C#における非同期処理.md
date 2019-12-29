@@ -66,3 +66,208 @@ private void Button_Click(object sender, RoutedEventArgs e)
 
 まず、上記「メソッドの処理が終わる」の意味です。
 `await`以降は`await`で指定した処理が終わるまで実行されない、と覚えておきましょう。
+
+
+## Taskクラスについて
+### 参考
+[C# 非同期、覚え書き。 - Qiita](https://qiita.com/hiki_neet_p/items/d6b3addda6c248e53ef0)
+[ひょうろくだまらん](http://outside6.wp.xdomain.jp/2016/08/04/post-205/)
+
+### 概要
+- タスクオブジェクトを作成・実行する手順は以下の3つ。
+  1. Task.Factory.StartNew
+  2. Task.Run
+  3. new Task()
+
+- 基本的には`Task.Run`を使えばよい
+- `Task.Run`は手軽だが細かな制御ができない。
+- `Task.Factory.StartNew`はオプションが多いので細かい設定が可能。
+
+### タスクの作成
+タスクオブジェクトを作成・実行する手順は以下の3つ。
+1. Task.Factory.StartNew
+2. Task.Run
+3. new Task()
+
+### Task.Factory.StartNew
+``` cs
+using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var task = Task.Factory.StartNew(() => Console.WriteLine("OK"));
+
+        Console.ReadLine();
+    }
+}
+```
+上記コードは、下記と同じ意味のようです。
+
+``` cs
+Sample.cs
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Task.Factory.StartNew(
+            () => Console.WriteLine("OK"),
+            CancellationToken.None,
+            TaskCreationOptions.None,
+            TaskScheduler.Default);
+
+        Console.ReadLine();
+    }
+}
+```
+
+TaskCreationOptions については、次節で触れます。
+TaskScheduler.Default は、ThreadPool を使用してスケジューリングするという意味になります。
+
+
+### Task.Run
+StartNew より記述が短いですね。
+
+``` cs
+Sample.cs
+using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Task.Run(() => Console.WriteLine("OK"));
+
+        Console.ReadLine();
+    }
+}
+```
+上記コードは、下記と同じ意味です。
+
+``` cs
+Sample.cs
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Task.Factory.StartNew(
+            () => Console.WriteLine("OK"),
+            CancellationToken.None,
+            TaskCreationOptions.DenyChildAttach,
+            TaskScheduler.Default);
+
+        Console.ReadLine();
+    }
+}
+```
+
+前節の `StartNew` との違いは、第3引数の `TaskCreationOptions.DenyChildAttach` の部分です。
+`Run` は子スレッドに親へのアタッチを禁止します。
+前節の `StartNew` は禁止しません。
+親スレッドへのアタッチは、`StartNew` メソッドに `TaskCreationOptions.AttachedToParent` を指定することで実現できます。
+
+実際の動作を比較してみましょう。
+
+StartNew の場合。
+
+``` cs
+Sample.cs
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Task.Factory.StartNew(() =>
+        {
+            Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(1000);
+                Console.WriteLine("Child");
+            }, TaskCreationOptions.AttachedToParent);
+        }).Wait();
+        Console.WriteLine("Parent");
+
+        Console.ReadLine();
+    }
+}
+```
+
+```
+output
+Child
+Parent
+```
+
+Run の場合。
+
+``` cs
+Sample.cs
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Task.Run(() =>
+        {
+            Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(1000);
+                Console.WriteLine("Child");
+            }, TaskCreationOptions.AttachedToParent);
+        }).Wait();
+        Console.WriteLine("Parent");
+
+        Console.ReadLine();
+    }
+}
+```
+```
+output
+Parent
+Child
+```
+Run の場合は、子スレッドの終了を待たずに親スレッドが終了していることがわかります。
+Run の子スレッドは親にアタッチできていないということですね。
+
+
+### new Task()
+コンストラクタから生成する場合です。
+Start メソッドで起動されます。
+
+``` cs
+Sample.cs
+using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        var task = new Task(() => Console.WriteLine("OK"));
+        task.Start();
+
+        Console.ReadLine();
+    }
+}
+```
+この場合、`Task` は `TaskScheduler.Current` というものを使用してスケジューリングされます。
+
+
+### Taskの引数、戻り値
