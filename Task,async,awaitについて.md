@@ -29,6 +29,26 @@ var task = client.GetAsync("https://......"); // <- awaitを付けていない
 - 基本的には`Task.Run`を使えばよい
 - `Task.Run`は手軽だが細かな制御ができない。
 - `Task.Factory.StartNew`はオプションが多いので細かい設定が可能。
+- 1,2のメソッドの戻り値は基本的に`Task`か`Task<TResult>`になる。
+- とは言え、コンストラクタとは違い`Task.Run`や`Task.Factory.StartNew`は呼び出した時点で中身のメソッドは実行されるので、戻り値を`Task`変数に入れなくてもよい。具体的には以下
+
+``` cs
+using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+		// ①、②どちらのコードも可能
+		// ①task変数に代入する。taskはこのあとtask.resultなど色々活用可能。
+       	var task = Task.Factory.StartNew(() => Console.WriteLine("task変数に代入する。"));
+        
+		// ②task変数に代入しない。コンソール出力を行うのみ。
+		Task.Factory.StartNew(() => Console.WriteLine("task変数には代入しない。実行のみ。"));
+    }
+}
+```
 
 ### 引数
 
@@ -83,30 +103,43 @@ class Program
 }
 ```
 
-## 戻り値について
-- 戻り値なし
+## Task内での戻り値について
+- Task内での戻り値なし
   - `Task`
-- 戻り値あり
+- Task内での戻り値あり
   - `Task<T>`
 
-### 戻り値あり `Task<T>`
+### Task\<TResult\>.Result（Task内での戻り値ありの場合）
+- `Task`はTask内での戻り値がない場合に用いる。そのため、呼び出し元スレッドに何か処理結果を返すことはない。
+- `Task<TResult>`はTask内での戻り値がある場合に用いる。そのため、呼び出し元スレッドに何か処理結果を返すときは、`Task<TResult>`クラスの`Result`プロパティを用いる。
+
+``` cs
+    static void Main()
+    {
+        Task<int> task = Task.Run<int>(() =>
+        {
+            int total = 0;
+            for (int i = 1; i <= 100; ++i)
+                total += i;
+            Thread.Sleep(4560); // 何か重い処理をしている...
+            return total;
+        });
+
+        int result = task.Result; // スレッドの処理の結果を「待ち受け」する
+
+        Console.WriteLine("Result is {0}", result);
+    }
+```
+ただしこう書くと、スレッドが終了するまで待つことになります。Run()で子スレッドに処理を投入したのに、すぐ次の行でスレッドの処理が終了するまで待ってしまっては、非同期処理の利点を完全に殺していることになります。つまり、まったくの無駄です。非同期処理なのですから、メインスレッドはRun()で処理を子スレッドに投入した後、スレッドの完了を待たずさっさと自分の処理に戻りたいのです。そんな都合の良い構文がC#にはあるのでしょうか？　まあこう書いている地点であるんですけどね。
 ``` cs
 Task<int> task = Task.Run<int>(() => {
         int total = 0;
         for (int i=1; i<=100; ++i)
             total += i;
         Thread.Sleep(4560); // 何か重い処理をしている...
-        return total
+        return total;
     });
-```
-では、実際のスレッドの戻り値の取り方はどうやるのでしょうか。それは Task の Resultプロパティで取得できます。Resultプロパティを使うと、スレッドの処理が「完了」するまで待って、結果を取得できます。
-``` cs
-Task<int> task = Task.Run<int>(new Func<int>(Calculate));
-int result = task.Result; // スレッドの終了まで「待つ」
-```
-ただしこう書くと、スレッドが終了するまで待つことになります。Run()で子スレッドに処理を投入したのに、すぐ次の行でスレッドの処理が終了するまで待ってしまっては、非同期処理の利点を完全に殺していることになります。つまり、まったくの無駄です。非同期処理なのですから、メインスレッドはRun()で処理を子スレッドに投入した後、スレッドの完了を待たずさっさと自分の処理に戻りたいのです。そんな都合の良い構文がC#にはあるのでしょうか？　まあこう書いている地点であるんですけどね。
-``` cs
-Task<int> task = Task.Run<int>(new Func<int>(Calculate));
+
 int result = await task; // スレッドの処理の結果を「待ち受け」する
 ```
 Taskにawaitを付けると、メインスレッドは処理を即リターンして、子スレッドの処理が終了すると、int result以降の処理が、おもむろに再開します。
