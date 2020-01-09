@@ -139,15 +139,22 @@ class Program
 
 ただしこう書くと、スレッドが終了するまで待つことになります。Run()で子スレッドに処理を投入したのに、すぐ次の行でスレッドの処理が終了するまで待ってしまっては、非同期処理の利点を完全に殺していることになります。つまり、まったくの無駄です。非同期処理なのですから、メインスレッドはRun()で処理を子スレッドに投入した後、スレッドの完了を待たずさっさと自分の処理に戻りたいのです。そんな都合の良い構文がC#にはあるのでしょうか？　まあこう書いている地点であるんですけどね。
 ``` cs
-Task<int> task = Task.Run<int>(() => {
-        int total = 0;
-        for (int i=1; i<=100; ++i)
-            total += i;
-        Thread.Sleep(4560); // 何か重い処理をしている...
-        return total;
-    });
+    static async Task Main()
+    {
+        Task<int> task = Task.Run<int>(() =>
+        {
+            int total = 0;
+            for (int i = 1; i <= 100; ++i)
+                total += i;
+            Thread.Sleep(4560); // 何か重い処理をしている...
+            return total;
+        });
 
-int result = await task; // スレッドの処理の結果を「待ち受け」する
+        //int result = task.Result; 
+        int result = await task; 
+
+        Console.WriteLine("Result is {0}", result);
+    }
 ```
 Taskにawaitを付けると、メインスレッドは処理を即リターンして、子スレッドの処理が終了すると、int result以降の処理が、おもむろに再開します。
 
