@@ -169,15 +169,114 @@ INPUT系は後ろにForが付くものと付かないものがありますが、
  @Html.EditorFor(model => model.Boo)
 ```
 
-### ビュー・ヘルパー
-ビュー・ヘルパーとは、ビュー・スクリプトを記述する際に役立つメソッドのこと。ASP.NET MVCでは、サーバ・コントロールを利用できない代わりに、ビュー・ヘルパーを利用することで、リンクやフォーム要素の生成などをごくシンプルなコードで表現できる。
-
-#### フォームを生成する － Html.BeginFormメソッド －
-
-#### ルート定義に基づいてフォームを生成する － Html.BeginRouteFormメソッド －
-
 ### テンプレート関連のビュー・ヘルパー
 [書籍転載：ASP.NET MVC 5 実践プログラミング](https://www.buildinsider.net/web/bookaspmvc5/040401)
+
+
+### タグヘルパー
+参考：
+[ASP.NET Core MVC の Razor で使える Tag Helpers のメモ書き - しばやん雑記](https://blog.shibayan.jp/entry/20170725/1500966960)  
+[ASP.NET Core のタグ ヘルパー](https://docs.microsoft.com/ja-jp/aspnet/core/mvc/views/tag-helpers/intro?view=aspnetcore-3.1)
+
+概要
+>基本的には asp-* という属性を使って書ける Html Helper です。HTML のタグとシームレスに統合されていて、構造を崩さずに書けるので Tag Helpers は最高に便利です。
+
+#### リンク生成 (a)
+``` html
+<!-- href = /home/about -->
+<a asp-controller="Home" asp-action="About">About me</a>
+
+<!-- href = /home/about/123 -->
+<a asp-controller="Home" asp-action="About" asp-route-id="123">About me</a>
+
+<!-- href = /home/about#top -->
+<a asp-controller="Home" asp-action="About" asp-fragment="top">Go to Top</a>
+
+<!-- href = https://hostname/home/about -->
+<a asp-controller="Home" asp-action="About" asp-protocol="https">Https link</a>
+
+<!-- href = https://www.example.com/home/about -->
+<a asp-controller="Home" asp-action="About" asp-protocol="https" asp-host="www.example.com">Absolute Path</a>
+```
+
+#### リソース参照 (img / link / script)
+``` html
+<!-- src = /img/top.png?v=SHA256HASH -->
+<img src="~/img/top.png" asp-append-version="true" />
+
+<!-- href のファイルを読み込めなかった時は asp-fallback-href を読む -->
+<link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+        asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+        asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+
+<!-- src のファイルを読み込めなかった時は asp-fallback-src を読む -->
+<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
+        asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+        asp-fallback-test="window.jQuery">
+</script>
+```
+
+
+#### フォーム表示 (form / input / select など)
+``` html
+<!-- action = /user/login -->
+<form asp-controller="Login" asp-action="User" method="post">
+
+    <!-- type="email" id="Email" name="Email" -->
+    <input asp-for="Email" />
+
+    <!-- type="password" id="Password" name="Password" -->
+    <input asp-for="Password" />
+
+    <button>Login</button>
+
+</form>
+
+<!-- CSRF 用トークンを自動出力しない -->
+<form asp-antiforgery="false">
+  <button>submit</button>
+</form>
+
+<!-- formaction = /forms/delete/123 -->
+<button asp-controller="Forms" asp-action="Delete" asp-route-id="123">Delete</button>
+
+<!-- asp-items には IEnumerable<SelectListItem> -->
+<select asp-for="Favorite" asp-items="AllItems">
+</select>
+```
+
+
+#### バリデーションエラー表示 (div / span)
+``` html
+<!-- 全てのエラーを表示 -->
+<div asp-validation-summary="All"></div>
+
+<!-- モデルに対してのエラーのみ -->
+<div asp-validation-summary="ModelOnly"></div>
+
+<!-- 指定したキーのエラーのみ -->
+<span asp-validation-for="Email"></span>
+```
+
+#### Core MVC 独自 (environment)
+``` html
+<!-- ASP.NET Core 1.1 まで -->
+<environment names="Production,Staging">
+  <link rel="stylesheet" href="~/site.min.css" />
+</environment>
+<environment names="Development">
+  <link rel="stylesheet" href="~/site.css" />
+</environment>
+
+<!-- ASP.NET Core 2.0 から -->
+<environment Exclude="Development">
+  <link rel="stylesheet" href="~/site.min.css" />
+</environment>
+<environment Include="Development">
+  <link rel="stylesheet" href="~/site.css" />
+</environment>
+```
+
 
 # コントローラーについて
 
