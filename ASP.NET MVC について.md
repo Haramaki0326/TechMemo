@@ -155,7 +155,7 @@ namespace razor2.Controllers
 ### レイアウト
 
 ### HTMLヘルパー
-参考：  [ASP.NET MVC HTML ヘルパー①](https://tokkan.net/csharp/asp3.html)
+参考：[ASP.NET MVC HTML ヘルパー①](https://tokkan.net/csharp/asp3.html)
 HTMLヘルパーはビューに埋め込むコントロールで、ASPがHTMLに変換してくれます。フォームやINPUT関連、リンクなどがあります。
 INPUT系は後ろにForが付くものと付かないものがありますが、これはプロパティの指定がプロパティ名直接かラムダ式を使用するかの違いになり、
 **Forが付かないものはプロパティを直接指定し、Forが付くものはラムダ式でプロパティを指定します。**
@@ -170,7 +170,88 @@ INPUT系は後ろにForが付くものと付かないものがありますが、
 
 ### テンプレート関連のビュー・ヘルパー
 [書籍転載：ASP.NET MVC 5 実践プログラミング](https://www.buildinsider.net/web/bookaspmvc5/040401)
+[yan note: ASP.NET MVC 12_テンプレートヘルパー ～その1～](http://yan-note.blogspot.com/2016/12/aspnet-mvc-12-1.html?m=1)
 
+>テンプレートヘルパーは、引数に指定したモデルのプロパティの型やその属性から自動的にHTML要素を生成してくれます。たとえばstring型であればinput要素を、bool型であればcheckbox要素を生成するといった具合です。
+
+>DisplayFor／EditorForヘルパーは、言うなれば、モデル定義に応じて出力を自在に変化できるヘルパー。DisplayForヘルパーがデータの表示を、EditorForヘルパーがデータ編集（入力）項目の生成を、それぞれ担っています。
+「モデル定義に応じて」と言ってわかりにくければ、モデルに定義されているデータ型、あるいは、付随するメタ情報（属性）に応じて、適切な出力を生成する、と言い換えても良いかもしれません。（たとえば）プロパティの型がstring型であれば、EditorForメソッドは標準のテキストボックス（`<input type="text">`要素）を、bool型であればチェックボックス（`<input type="checkbox"`>要素）を、それぞれ出力します。
+
+![](https://re.buildinsider.net/web/bookaspmvc5/040401/4-4_s.gif)
+
+>モデルの状態をヘルパーが自動的に認識してくれるわけです。このような性質から、テンプレートヘルパーには、以下のようなメリットがあります。
+- ビューが、プロパティの型／メタ情報を意識しなくても良い
+- モデル（型／メタ情報）の変更がビューに影響しにくい
+- 同じ型（メタ情報）であれば同じ出力を生成するので、出力に一貫性を持たせやすい
+>モデルをもとにデータを入出力するならば、まずはTextBoxFor／CheckBoxForなど個別のヘルパーではなく、テンプレートヘルパーを優先して利用するのが望ましいでしょう。
+
+
+#### DisplayNameForヘルパー
+DisplayNameForヘルパーは、モデルのプロパティの表示名をhtmlタグで修飾せずに出力します。
+- 属性を指定しない場合、プロパティ名をそのまま出力します。
+- DisplaｙName属性を指定した場合、指定した値を出力します。
+- Display属性のnameプロパティを指定した場合も、指定した値を出力します。
+
+
+**モデル**
+``` cs
+//DisplayName属性を使用する場合にインポートする
+using System.ComponentModel;
+//Display属性を使用する場合にインポートする
+using System.ComponentModel.DataAnnotations;
+
+namespace Practice.Models
+{
+    public class TemplateHelperViewModel
+    {
+        public string Text1 { get; set; }
+
+        [DisplayName("テキスト2")]
+        public string Text2 { get; set; }
+
+        [Display(Name = "テキスト3")]
+        public string Text3 { get; set; }
+    }
+}
+```
+
+**コントローラー**
+``` cs
+using System.Web.Mvc;
+
+namespace Practice.Controllers
+{
+    public class TemplateHelperController : Controller
+    {
+        public ActionResult Index()
+        {
+            var mdl = new Models.TemplateHelperViewModel();
+            return View(mdl);
+        }
+    }
+}
+```
+
+
+**ビュー**
+``` html
+@model Practice.Models.TemplateHelperViewModel
+
+@Html.DisplayNameFor(mdl => mdl.Text1)
+@Html.DisplayNameFor(mdl => mdl.Text2)
+@Html.DisplayNameFor(mdl => mdl.Text3)
+```
+
+**出力**
+![](https://4.bp.blogspot.com/-1i1nvn3cYDk/WFErbyjkcPI/AAAAAAAAD4o/pNg1z8Ktj2ALm1W1LTZUSr9SQdM8wyuegCLcB/s1600/WS000002.JPG)
+
+
+
+#### DisplayForヘルパー/ EditorForヘルパー
+DisplayForヘルパーはモデルの値を表示形式で出力します。
+EditorForヘルパーはモデルの値を入力形式で出力します。
+モデルの値の型やDataType属性（名前空間：System.ComponentModel.DataAnnotations）に指定した値により出力形式が変わります。
+![](//img/テンプレートヘルパーまとめ.PNG)
 
 ### タグヘルパー
 参考：
