@@ -1,6 +1,7 @@
 # EntityFrameworkについて
 ## 参考
 - [第2回　Entity Frameworkコード・ファーストでモデル開発](https://www.atmarkit.co.jp/fdotnet/aspnetmvc3/aspnetmvc3_03/aspnetmvc3_03_01.html)
+- [モデル](https://docs.microsoft.com/ja-jp/aspnet/core/tutorials/first-mvc-app/adding-model)
 
 ## 手順
 - モデル・クラス（＝エンティティ）の定義
