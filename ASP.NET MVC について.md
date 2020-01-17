@@ -253,6 +253,95 @@ EditorForヘルパーはモデルの値を入力形式で出力します。
 モデルの値の型やDataType属性（名前空間：System.ComponentModel.DataAnnotations）に指定した値により出力形式が変わります。
 ![](//img/テンプレートヘルパーまとめ.PNG)
 
+#### 具体例
+**モデル**
+``` cs
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
+namespace MyFirstMVC.Models
+{
+	public class Book
+	{
+		public int Id { get; set; }
+		[DisplayName("タイトル")]
+		[DataType(DataType.Date)]
+		public string Title { get; set; }
+
+		[DisplayName("金額")]
+		[DataType(DataType.DateTime)]
+		public int Price { get; set; }
+
+		[DisplayName("出版社")]
+		[DataType(DataType.EmailAddress)]
+		public string Publisher { get; set; }
+
+		[DisplayName("サンプル")]
+		[DataType(DataType.Password)]
+		public bool Sample { get; set; }
+	}
+}
+
+```
+
+**ビュー**
+``` html
+@model IEnumerable<MyFirstMVC.Models.Book>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Publisher)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sample)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.EditorFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.EditorFor(modelItem => item.Price)
+            </td>
+            <td>
+                @Html.EditorFor(modelItem => item.Publisher)
+            </td>
+            <td>
+                @Html.EditorFor(modelItem => item.Sample)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+```
+
 ### タグヘルパー
 参考：
 [ASP.NET Core MVC の Razor で使える Tag Helpers のメモ書き - しばやん雑記](https://blog.shibayan.jp/entry/20170725/1500966960)  
