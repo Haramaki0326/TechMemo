@@ -256,7 +256,10 @@ EditorForヘルパーはモデルの値を入力形式で出力します。
 #### 具体例
 ![](//img/テンプレートヘルパー具体例.PNG)
 
-**モデル**
+
+<details>
+<summary>モデル</summary>
+
 ``` cs
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -313,23 +316,40 @@ namespace MyFirstMVC.Models
 }
 
 ```
-
-
-
+</details>
 
 <details>
-<summary>折りたたみ部分のタイトル</summary>
-<pre>
-<code>
-折りたたまれる詳細情報部分
-折りたたまれる詳細情報部分
-折りたたまれる詳細情報部分
-</code>
-</pre>
+<summary>コントローラー</summary>
+
+``` cs
+using Microsoft.AspNetCore.Mvc;
+using MyFirstMVC.Models;
+
+namespace MyFirstMVC.Controllers
+{
+    public class SampleController : Controller
+    {
+        public IActionResult Index()
+        {
+            var sample = new SampleModel
+            {
+                CheckBox_sample = true,
+                EmailAddress_sample = "Sample@gmail.com",
+                URL_sample = "FizBuz.com",
+                Number_sample = 12345,
+                Date_sample = "2020/01/18",
+            };
+            return View(sample);
+        }
+    }
+}
+```
 </details>
 
 
-**ビュー**
+<details>
+<summary>ビュー</summary>
+
 ``` html
 @model MyFirstMVC.Models.SampleModel
 
@@ -543,6 +563,8 @@ namespace MyFirstMVC.Models
     </tbody>
 </table>
 ```
+</details>
+
 
 ### タグヘルパー
 参考：
