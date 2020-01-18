@@ -254,6 +254,8 @@ EditorForヘルパーはモデルの値を入力形式で出力します。
 ![](//img/テンプレートヘルパーまとめ.PNG)
 
 #### 具体例
+![](//img/テンプレートヘルパー具体例.PNG)
+
 **モデル**
 ``` cs
 using System.ComponentModel;
@@ -261,32 +263,86 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MyFirstMVC.Models
 {
-	public class Book
+	public class SampleModel
 	{
 		public int Id { get; set; }
-		[DisplayName("タイトル")]
-		[DataType(DataType.Date)]
-		public string Title { get; set; }
 
-		[DisplayName("金額")]
-		[DataType(DataType.DateTime)]
-		public int Price { get; set; }
+		[DisplayName("bool型(DataType無指定)")]
+		public bool CheckBox_sample { get; set; }
 
-		[DisplayName("出版社")]
+		[DisplayName("Mailアドレス")]
 		[DataType(DataType.EmailAddress)]
-		public string Publisher { get; set; }
+		public string EmailAddress_sample { get; set; }
 
-		[DisplayName("サンプル")]
+		[DisplayName("URL")]
+		[DataType(DataType.Url)]
+		public string URL_sample { get; set; }
+
+		[DisplayName("HTML")]
+		[DataType(DataType.Html)]
+		public string Html_sample { get; set; }
+
+		[DisplayName("数値型(DataType無指定)")]
+		public int Number_sample { get; set; }
+
+		[DisplayName("日付入力（Date）")]
+		[DataType(DataType.Date)]
+		public string Date_sample { get; set; }
+
+		[DisplayName("日時入力（DateTime）")]
+		[DataType(DataType.DateTime)]
+		public string DateTime_sample { get; set; }
+
+		[DisplayName("時刻入力（Time）")]
+		[DataType(DataType.Time)]
+		public string Time_sample { get; set; }
+
+		[DisplayName("テキストエリア（MultilineText）")]
+		[DataType(DataType.MultilineText)]
+		public string MultilineText_sample { get; set; }
+
+		[DisplayName("パスワード（Password）")]
 		[DataType(DataType.Password)]
-		public bool Sample { get; set; }
+		public string Password_sample { get; set; }
+
+		[DisplayName("電話番号（PhoneNumber）")]
+		[DataType(DataType.PhoneNumber)]
+		public string PhoneNumber_sample { get; set; }
+
 	}
 }
 
 ```
+<details>
+<summary>コントローラー</summary>
+``` cs
+using Microsoft.AspNetCore.Mvc;
+using MyFirstMVC.Models;
+
+namespace MyFirstMVC.Controllers
+{
+    public class SampleController : Controller
+    {
+        public IActionResult Index()
+        {
+            var sample = new SampleModel
+            {
+                CheckBox_sample = true,
+                EmailAddress_sample = "Sample@gmail.com",
+                URL_sample = "FizBuz.com",
+                Number_sample = 12345,
+                Date_sample = "2020/01/18",
+            };
+            return View(sample);
+        }
+    }
+}
+```
+</details>
 
 **ビュー**
 ``` html
-@model IEnumerable<MyFirstMVC.Models.Book>
+@model MyFirstMVC.Models.SampleModel
 
 @{
     ViewData["Title"] = "Index";
@@ -294,52 +350,209 @@ namespace MyFirstMVC.Models
 
 <h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                ヘルパー
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Price)
+                表示名（属性：DisplayName）
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Publisher)
+                データ型/メタ情報（属性：DataType）
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Sample)
+                出力
             </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
         <tr>
             <td>
-                @Html.EditorFor(modelItem => item.Title)
+                DisplayFor
             </td>
             <td>
-                @Html.EditorFor(modelItem => item.Price)
+                @Html.DisplayNameFor(model => model.CheckBox_sample)
             </td>
             <td>
-                @Html.EditorFor(modelItem => item.Publisher)
+                bool型
             </td>
             <td>
-                @Html.EditorFor(modelItem => item.Sample)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                @Html.DisplayFor(model => model.CheckBox_sample)
             </td>
         </tr>
-}
+        <tr>
+            <td>
+                DisplayFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.EmailAddress_sample)
+            </td>
+            <td>
+                DataType（EmailAddress）
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.EmailAddress_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                DisplayFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.URL_sample)
+            </td>
+            <td>
+                DataType（Url）
+            </td>
+            <td>
+                @Html.DisplayFor(model => model.URL_sample)
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.CheckBox_sample)
+            </td>
+            <td>
+                bool型
+            </td>
+            <td>
+                @Html.EditorFor(model => model.CheckBox_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.Number_sample)
+            </td>
+            <td>
+                int/long型
+            </td>
+            <td>
+                @Html.EditorFor(model => model.Number_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.Date_sample)
+            </td>
+            <td>
+                DataType（Date）
+            </td>
+            <td>
+                @Html.EditorFor(model => model.Date_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.DateTime_sample)
+            </td>
+            <td>
+                DataType（DateTime）
+            </td>
+            <td>
+                @Html.EditorFor(model => model.DateTime_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.EmailAddress_sample)
+            </td>
+            <td>
+                DataType（EmailAddress）
+            </td>
+            <td>
+                @Html.EditorFor(model => model.EmailAddress_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.MultilineText_sample)
+            </td>
+            <td>
+                DataType（MultilineText）
+            </td>
+            <td>
+                @Html.EditorFor(model => model.MultilineText_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.Password_sample)
+            </td>
+            <td>
+                DataType（Password）
+            </td>
+            <td>
+                @Html.EditorFor(model => model.Password_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.PhoneNumber_sample)
+            </td>
+            <td>
+                DataType（PhoneNumber）
+            </td>
+            <td>
+                @Html.EditorFor(model => model.PhoneNumber_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.Time_sample)
+            </td>
+            <td>
+                DataType（Time）
+            </td>
+            <td>
+                @Html.EditorFor(model => model.Time_sample)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EditorFor
+            </td>
+            <td>
+                @Html.DisplayNameFor(model => model.URL_sample)
+            </td>
+            <td>
+                DataType（Url）
+            </td>
+            <td>
+                @Html.EditorFor(model => model.URL_sample)
+            </td>
+        </tr>
     </tbody>
 </table>
-
 ```
 
 ### タグヘルパー
