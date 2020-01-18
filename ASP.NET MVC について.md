@@ -251,10 +251,10 @@ namespace Practice.Controllers
 DisplayForヘルパーはモデルの値を表示形式で出力します。
 EditorForヘルパーはモデルの値を入力形式で出力します。
 モデルの値の型やDataType属性（名前空間：System.ComponentModel.DataAnnotations）に指定した値により出力形式が変わります。
-![](//img/テンプレートヘルパーまとめ.PNG)
+![](img/テンプレートヘルパーまとめ.PNG)
 
 #### 具体例
-![](//img/テンプレートヘルパー具体例.PNG)
+![](img/テンプレートヘルパー具体例.PNG)
 
 
 <details>
