@@ -1,0 +1,5 @@
+null許容型
+intなどは本来nullは大ニュースできない
+
+int num = null; //エラー
+int? num = null; //エラーにならない
