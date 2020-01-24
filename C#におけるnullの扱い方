@@ -3,3 +3,5 @@ intなどは本来nullは代入できない
 
 int num = null; //エラー
 int? num = null; //エラーにならない
+
+IsnullOrEmpty
