@@ -1,16 +1,40 @@
 # ASP.NET Core MVC におけるルーティング
+## エンドポイント（ASP.NET Core 3.0以降）
+`ASP.NET Core 3.0`以降では、ルーティングにはエンドポイント (Endpoint) を使用して、アプリの論理エンドポイントを表します。
 
-## エンドポイント（ASP.NET Core 2.2以降）
-`ASP.NET Core 2.2`以降では、ルーティングにはエンドポイント (Endpoint) を使用して、アプリの論理エンドポイントを表します。
-
-#### Routeクラス（ASP.NET Core 2.1以前）
-※`ASP.NET Core 2.1`以前では`IRouter`の標準実装として`Route` クラスが与えられ、それを用いて設定を行う。
-`2.1`以前と`2.2`以降との違いは以下
+#### Routeクラス（ASP.NET Core 2.2以前）
+※`ASP.NET Core 2.2`以前では`IRouter`の標準実装として`Route` クラスが与えられ、それを用いて設定を行う。
+`2.2`以前と`3.0`以降との違いは以下
+[エンドポイント ルーティングと以前のバージョンのルーティングとの相違点](https://docs.microsoft.com/ja-jp/aspnet/core/fundamentals/routing?view=aspnetcore-3.1#endpoint-routing-differences-from-earlier-versions-of-routing)
 [スタートアップコードのルーティング](https://docs.microsoft.com/ja-jp/aspnet/core/migration/22-to-30?view=aspnetcore-3.1&tabs=visual-studio#routing-startup-code)
 
 ## サンプルコード
-VisualStudioからMVCを選んで自動生成される`Startup`クラスは以下。
+VisualStudioからMVCを選んで自動生成される`Program.cs`、`Startup.cs`は以下。
+`Program.cs`
+``` cs
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
+namespace SampleNetCoreMVC
+{
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			CreateHostBuilder(args).Build().Run();
+		}
+
+		public static IHostBuilder CreateHostBuilder(string[] args) =>
+			Host.CreateDefaultBuilder(args)
+				.ConfigureWebHostDefaults(webBuilder =>
+				{
+					webBuilder.UseStartup<Startup>();
+				});
+	}
+}
+```
+
+`Startup.cs`
 ``` cs
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
