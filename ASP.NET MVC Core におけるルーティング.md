@@ -107,3 +107,17 @@ namespace SampleNetCoreMVC
 ## 規則ルーティング
 
 ## 属性ルーティング
+
+
+## 実際の実装
+ASP.NET Coreの内部実装はGitHubで公開している。以下は`MapControllerRoute`の実装
+
+
+- [ControllerEndpointRouteBuilderExtensions.MapControllerRoute](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.controllerendpointroutebuilderextensions.mapcontrollerroute?view=aspnetcore-3.1)
+- [ControllerEndpointRouteBuilderExtensions.cs](https://github.com/dotnet/aspnetcore/blob/6ce8a879ae10e9f27798ec6e1c577092413f813d/src/Mvc/Mvc.Core/src/Builder/ControllerEndpointRouteBuilderExtensions.cs)
+- [IEndpointRouteBuilder.cs](https://github.com/dotnet/aspnetcore/blob/133a7e0414ffeb6af54093bb678afb3d401248e0/src/Http/Routing/src/IEndpointRouteBuilder.cs)
+- [ControllerActionEndpointDataSource.cs](https://github.com/dotnet/aspnetcore/blob/6ce8a879ae10e9f27798ec6e1c577092413f813d/src/Mvc/Mvc.Core/src/Routing/ControllerActionEndpointDataSource.cs)
+- [ConventionalRouteEntry.cs](https://github.com/dotnet/aspnetcore/blob/6a99743d337d205bdf78333cfaac33db993c1034/src/Mvc/Mvc.Core/src/Routing/ConventionalRouteEntry.cs)
+- [RoutePatternFactory.cs](https://github.com/dotnet/aspnetcore/blob/c7f05c614ab7ecb1ff8331287fe050d322f10b2e/src/Http/Routing/src/Patterns/RoutePatternFactory.cs)
+- [RoutePatternParser.cs](https://github.com/dotnet/aspnetcore/blob/19c9010c2fc44f6fa3952c3f46d1b6e86e45fa8c/src/Http/Routing/src/Patterns/RoutePatternParser.cs)
+
