@@ -107,14 +107,15 @@ namespace SampleNetCoreMVC
 ## 規則ルーティング
 
 次の表は、ルート テンプレートの例とその動作をまとめたものです。
+
 |ルートテンプレート|一致するURIの例|要求URI…|
 |---|---|---|
-|`hello`|`/hello`|	単一パス `/hello` にのみ一致します。
-|`{Page=Home}`|	`/`|	一致し、`Page` が `Home` に設定されます。
-|`{Page=Home}`|	`/Contact`|	一致し、`Page` が `Contact` に設定されます。
-|`{controller}/{action}/{id?}`|	`/Products/List`|	`Products` コントローラーと `List` アクションにマッピングされます。
-|`{controller}/{action}/{id?}`|	`/Products/Details/123`|	`Products` コントローラーと `Details` アクションにマッピングされます (id は 123 に設定されます)。
-|`{controller=Home}/{action=Index}/{id?}`|`/`|	`Home` コントローラーと `Index` メソッドにマッピングされます (id は無視されます)。
+|`hello`|`/hello`|	単一パス `/hello` にのみ一致します。|
+|`{Page=Home}`|	`/`|	一致し、`Page` が `Home` に設定されます。|
+|`{Page=Home}`|	`/Contact`|	一致し、`Page` が `Contact` に設定されます。|
+|`{controller}/{action}/{id?}`|	`/Products/List`|	`Products` コントローラーと `List` アクションにマッピングされます。|
+|`{controller}/{action}/{id?}`|	`/Products/Details/123`|	`Products` コントローラーと `Details` アクションにマッピングされます (id は 123 に設定されます)。|
+|`{controller=Home}/{action=Index}/{id?}`|`/`|	`Home` コントローラーと `Index` メソッドにマッピングされます (id は無視されます)。|
 
 ## 属性ルーティング
 
