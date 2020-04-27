@@ -1,7 +1,0 @@
-null許容型
-intなどは本来nullは代入できない
-
-int num = null; //エラー
-int? num = null; //エラーにならない
-
-IsnullOrEmpty
