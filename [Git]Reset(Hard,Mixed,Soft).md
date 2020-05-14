@@ -2,6 +2,11 @@
 ## 参考
 [[git reset (--hard/--soft)]ワーキングツリー、インデックス、HEADを使いこなす方法 - Qiita](https://qiita.com/shuntaro_tamura/items/db1aef9cf9d78db50ffe)
 
+## `reset`と`revert`の違い
+- `reset`：削除履歴を残さない
+- `revert`：削除履歴を残す（打ち消しコミットを作成する）
+
+
 ## 概要
 - リンク先の記事が分かりやすいのでこれを読む
 - Gitのレベルには以下の3つがある。
