@@ -35,20 +35,11 @@
 
 ## 3.2 依存関係の管理
 ### newは不吉な臭い
-- クラスAがAのクラス内で別クラス`ClassB`を参照している
-  - → **AはBに依存している**。
-- 別クラス`ClassB`を`new`で生成して直接参照している箇所に対して以下のリファクタリングを行う
-  - まず`ClassB`のインターフェース`IClassB`を定義する
-  - `IClassB`型のオブジェクトを利用するようにする
-  - 次に`new`で生成するのではなく、コンストラクタで`IClassB`変数をもらってやり、`IClassB`フィールドに設定してやる（**依存性の注入**）
-
-### 具体例
-#### Before
+**インスタンスの直接の生成は以下のような問題を抱える。**
 ``` cs
 public class AccountController
 {
     private readonly SecurityService securityService;
-
     public AccountController()
     {
         this.securityService = new SecurityService();
@@ -57,16 +48,48 @@ public class AccountController
     [HttpPost]
     public void ChangePassword(Guid userID, string newPassword)
     {
-        var userRepository = new userRepository();
-        var user = userRepository.GetByID(userID)
-        user.ChangePassword(newPassword);
-        this.securityService.ChangeUsersPassword(userID, newPassword);
+        var userRepository = new UserRepository();
+        var user = userRepository.GetByID(userID);
+        this.securityService.ChangeUsersPassword(user, newPassword);
     }
 }
 ```
 
+### 実装を拡張することが不可能
+`SecurityService`の実装を変更する場合にどうするか？対応方法としては、
+- `SecurityService`のサブクラス`NewSecurityService`を作って、それを参照するように`AccountController`も変更するか。
+- `SecurityService`を直接変更するか。
 
-#### After
+**→どちらにせよ、`SecurityService`を変更したら`AccountController`の再テストが必要になってしまう！**
+
+### 依存関係の連鎖
+1. `AccountController`が`SecurityService`と`UserRepository`の実装に永遠に依存する。
+→`SecurityService`と`UserRepository`の実装が終わっていないと、`AccountController`のテストができない。
+2. `SecurityService`と`UserRepository`の依存先が`AccountController`の暗黙的な依存先になっている。
+→`SecurityService`と`UserRepository`の依存先の実装が終わっていないと、`AccountController`のテストができない。
+
+### テスト容易性の欠如
+`AccountController`のUTが非常に難しくなっている。
+→ 上記2点の結果。
+上記のコードでは`AccountController`はモックを使ってのUTが不可能。
+
+### その他の不適切な関係（メソッドの引数が不適切）
+→`AccountController`に限らず、`SecurityService.ChangeUsersPassword()`を利用するすべてのクライアントクラスに以下のように`User`オブジェクトの生成を任せることになっている
+``` cs
+        var userRepository = new UserRepository();
+        var user = userRepository.GetByID(userID);
+```
+→本来は`SecurityService`がUserオブジェクトを作るべき
+
+### 解決方法
+- クラスAがAのクラス内で別クラス`ClassB`を参照している
+  - → **AはBに依存している**。
+- 別クラス`ClassB`を`new`で生成して直接参照している箇所に対して以下のリファクタリングを行う
+  - まず`ClassB`のインターフェース`IClassB`を定義する
+  - `IClassB`型のオブジェクトを利用するようにする
+  - 次に`new`で生成するのではなく、コンストラクタで`IClassB`変数をもらってやり、`IClassB`フィールドに設定してやる（**依存性の注入**）
+
+### After
 ``` cs
 public class AccountController
 {
@@ -144,16 +167,16 @@ public class SecurityService : ISecurityService
 - それを避けるために以下のNull Object パターンを適用して、大量のnullチェックif文を書かなくてもよくする
   - 登場オブジェクトは以下の5つ
     - `Client`
-    - `IFooServer`
-    - `FooServer : IFooServer`
-    - `NullFooServer : IFooServer`
-    - `IFooServer FooRepository.GetById(FooId)`
-  - 利用クラス `FooServer` に対してインターフェイス `IFooServer` を用意する
-  - インターフェイス `IFooServer` の実装として、1.通常クラス `FooServer` と、2.Null Object クラス `NullFooServer : IFooServer`を用意する
+    - `IFooService`
+    - `FooService : IFooService`
+    - `NullFooService : IFooService`
+    - `IFooService FooRepository.GetById(FooId)`
+  - 利用クラス `FooService` に対してインターフェイス `IFooService` を用意する
+  - インターフェイス `IFooService` の実装として、1.通常クラス `FooService` と、2.Null Object クラス `NullFooService : IFooService`を用意する
     - 1. 通常のクラスにはそれまでのロジックを書いておく（とくに変更はしない）
     - 2. Null Object には利用するインスタンスがnullだった場合の、プロパティやメソッドのデフォルト値を書いておく
-  - `IFooServer FooRepository.GetById(FooId)` では、`FooServer`が見つかったときはそのまま`FooServer`を `Client` に戻し、見つからない場合は`NullFooServer`を生成して戻す。
-  - `Client` は `FooRepository.GetById(FooId)` で取得した `IFooServer` のインスタンスに対し、Nullかどうかを気にせずプロパティやメソッドにアクセスして利用することができる。
+  - `IFooService FooRepository.GetById(FooId)` では、`FooService`が見つかったときはそのまま`FooService`を `Client` に戻し、見つからない場合は`NullFooService`を生成して戻す。
+  - `Client` は `FooRepository.GetById(FooId)` で取得した `IFooService` のインスタンスに対し、Nullかどうかを気にせずプロパティやメソッドにアクセスして利用することができる。
 
 #### サンプルコード
 
@@ -172,7 +195,7 @@ static void Main(string[] args)
 }
 ```
 ``` cs
-// IFooServer
+// IFooService
 
 public interface IUser
 {
@@ -182,7 +205,7 @@ public interface IUser
 }
 ```
 ``` cs
-// FooServer : IFooServer
+// FooService : IFooService
 
 public class User : IUser
 {
@@ -201,7 +224,7 @@ public class User : IUser
 ```
 
 ``` cs
-// NullFooServer : IFooServer
+// NullFooService : IFooService
 
 public class NullUser : IUser
 {
@@ -220,7 +243,7 @@ public class NullUser : IUser
 ```
 
 ``` cs
-// IFooServer FooRepository.GetById(FooId)
+// IFooService FooRepository.GetById(FooId)
 
 public class UserRepository : IUserRepository
 {
@@ -255,4 +278,126 @@ public class UserRepository : IUserRepository
 ### 4.2.3 Strategy パターン
 
 ## 4.3 さらなる汎用性を求めて
+
+
+
+# 第9章 リスコフの置換原則（LSP）
+## 9.1 リスコフの置換原則とは
+
+### 正式な定義
+**SがTの派生型であるとすれば、T型のオブジェクトをS型のオブジェクトと置き換えたとしても、プログラムは動作し続けるはずである。**
+
+### 用語説明
+#### ■ 基底型
+クライアントが参照する型（T）。クライアントはさまざまなメソッドを呼び出し、そのどれもが派生型によてオーバーライド（部分的に特化）できます。
+
+#### ■ 派生型
+基底型（T）を継承するクラスファミリ（S）のいずれかのクラス。具体的にどの派生型を呼び出しいているのかをクライアントが知るべきではなく、知る必要もありません。クライアントの振る舞いは、与えられた派生型のインスタンスに関係なく、同じでなれければなりません。
+
+#### ■ コンテキスト
+クライアントが派生型を操作する方法。クライアントが派生型を操作しないとしたら、リスコフの置換原則に従うことも、違反することもあり得ません。
+
+
+### リスコフの置換原則のルール
+LSPを守るには、以下の2ルールを守る必要がある
+
+#### コントラクトのルール
+- 事前条件を派生型で強化することはできない
+- 事後条件を派生型で緩和することはできない
+- 基底型の不変条件は派生型でも維持されなければならない
+
+#### 変性のルール
+- 派生型のメソッドの引数には反変性がなければならない
+- 派生型の戻り値の型には共変性がなければならない
+- 既存の例外階層に含まれていない新しい例外を派生型からスローすることはできない
+
+
+## 9.2 コントラクト
+### 事前条件
+- 事前条件は、「メソッドを失敗させずに確実に実行するために必要なすべての条件」
+- 以下の例のように、メソッドの先頭にガード句を配置することで、事前条件を実装できる
+
+``` cs
+public decimal CalculateShippingCost(   float packageWeightInKillograms,
+                                        Size<float> packageDimenstionsInInches,
+                                        RegionInfo destination)
+{
+    if(packageWeightInKillograms <= 0f)
+        throw new ArgumentOutOfRangeException("packageWeightInKillograms",
+            "Package weight must be positive and non-zero");
+
+    if(packageDimenstionsInInches.X <= 0f || packageDimenstionsInInches.Y <= 0f)
+        throw new ArgumentOutOfRangeException("packageDimenstionsInInches",
+            "Package dimensions must be positive and non-zero");
+
+    return decimal.MinusOne;
+}
+```
+
+### 事後条件
+- 事後条件は、「メソッド終了時にオブジェクトが有効な状態のままであるかどうかをチェックするための条件」
+- 以下の例のように、メソッドの最後にガード句を配置することで、事後条件を実装できる
+
+``` cs
+public virtual decimal CalculateShippingCost(   float packageWeightInKillograms,
+                                        Size<float> packageDimenstionsInInches,
+                                        RegionInfo destination)
+{
+    if(packageWeightInKillograms <= 0f)
+        throw new ArgumentOutOfRangeException("packageWeightInKillograms",
+            "Package weight must be positive and non-zero");
+
+    if(packageDimenstionsInInches.X <= 0f || packageDimenstionsInInches.Y <= 0f)
+        throw new ArgumentOutOfRangeException("packageDimenstionsInInches",
+            "Package dimensions must be positive and non-zero");
+
+    var shippingCost = decimal.One;
+
+    // 送料の計算
+
+    if(shippingCost <= decimal.Zero)
+        throw new ArgumentOutOfRangeException("return",
+            "The return value is out of range");
+
+    return shippingCost;
+}
+```
+
+### データ不変条件
+
+
+
+## 9.3 共変性と反変性
+- データ不変条件は、「オブジェクトのライフタイムにわたって変化しない述語のこと」
+- オブジェクトが作成された時点で満たされ、オブジェクトがスコープを外れるまでその状態が維持されなければならない
+- 以下の例のように、プロパティのセッターにガード句を配置することで、不変条件を実装できる
+
+``` cs
+public class ShippingStrategy
+{
+    public ShippingStrategy(decimal flatRate)
+    {
+        FlatRate = flatRate;
+    }
+
+    protected decimal flatRate;
+
+    public decimal FlatRate
+    {
+        get
+        {
+           return flateRate;
+        }
+
+        set
+        {
+            if(value <= decimal.Zero)
+                throw new ArgumentOutOfRangeException("value",
+                    "Flat rate must be positive and non-zero");
+
+            floatRate = value;
+        }
+    }
+}
+```
 
