@@ -308,5 +308,42 @@ https://ja.javascript.info/function-basics
 https://ja.javascript.info/function-expressions  
 https://ja.javascript.info/function-object  
 
+### メソッドの考え方
+- JSのオブジェクトとは連想配列
+- キーと値の組合せをもつ
+- キーにはオブジェクト名、値にはオブジェクトの実体
+- 関数もオブジェクトである
 
+したがって
+
+``` js
+let obj = {
+  prop1 : "hoge";
+
+  prop2 : "fuga";
+
+  func1 : function(){
+    // 処理
+  }
+  
+}
+```
+
+という形で書ける
+
+そして上の省略形として
+
+``` js
+let obj = {
+  prop1 : hoge;
+
+  prop2 : fuga;
+
+  func1(){
+    …
+  }
+}
+```
+
+という形で書ける
 ## プロトタイプ
